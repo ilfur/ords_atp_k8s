@@ -1,13 +1,13 @@
 Basierend auf den Docker Build Skripten von Oracle (github.com/oracle/docker-images) habe ich das Skript für OracleRestDataServices ein wenig angepaßt und für Autonomous-Wallets tauglich gemacht. Daher sind die groben Schritte:
 
-1) Docker Image für Java erzeugen<br>
+<b>1) Docker Image für Java erzeugen</b><br>
 server-jre-8u291-linux.x64.tar.gz herunterladen von oracle: (Patchlevel egal, Dateiname server-jre-8*.tar.gz)<br>
 Java SE - Downloads | Oracle Technology Network | Oracle Deutschland(Server JRE download)<br>
 <br>
 Kopieren in das Verzeichnis docker-images/OracleJava/8<br>
 Ausführen von docker-images/OracleJava/8/build.sh<br>
 <br>
-2) Docker Image für ORDS erzeugen (verwendet/basiert auf dem Java Image)<br>
+<b>2) Docker Image für ORDS erzeugen (verwendet/basiert auf dem Java Image)</b><br>
 Oracle REST Data Services 20.4.3 herunterladen von oracle: (Patchlevel egal, Dateiname ords*zip)<br>
 Oracle REST Data Services Download<br>
 Autonomus DB Wallet herunterladen von Oracle Cloud (z.B. Klick auf Autonomous DB -> Ihre Datenbank -> Button "DB Connection" -> Button "Download Wallet". Die Wallet Datei muß mit dem Namen "Wallet_*") beginnen, mit großem W. Falls nicht, bitte einfach entsprechend umbenennen.<br>
@@ -17,7 +17,7 @@ Kopieren beider Dateien (ords*zip und Wallet*zip) nach docker-images/OracleRestD
 Aufruf von docker-images/OracleRestDataServices/dockerfiles/buildDockerImage.sh<br>
 <br>
 <br>
-3) Beide Docker images nach Frankfurt hochladen<br>
+<b>3) Beide Docker images nach Frankfurt hochladen</b><br>
 docker tag oracle/serverjre:8 fra.ocir.io/<tenant-name>/<repo-name>/oracle/serverjre:8<br>
 docker tag oracle/restdataservices:20.4.3 fra.ocir.io/<tenant-name>/<repo-name>/oracle/restdataservices:20.4.3<br>
 docker login fra.ocir.io<br>
@@ -27,8 +27,8 @@ Passwort: AUTH TOKEN erzeugt in Cloud UI (z.B: Klick auf eigenen Benutzer -> Set
 docker push fra.ocir.io/<tenant-name>/<repo-name>/oracle/serverjre:8<br>
 docker push fra.ocir.io/<tenant-name>/<repo-name>/oracle/restdataservices:20.4.3<br>
 <br>
-4) Kubernetes Anwendung einrichten<br>
-4.1) Erzeugen eines Datenbank-Benutzers mit ORDS Berechtigung (parallel zu ORDS_PUBLIC_USER, z.B. ORDS_CUSTOM) via "admin" Benutzer:<br>
+<b>4) Kubernetes Anwendung einrichten</b><br>
+<b>4.1) Erzeugen eines Datenbank-Benutzers mit ORDS Berechtigung (parallel zu ORDS_PUBLIC_USER, z.B. ORDS_CUSTOM) via "admin" Benutzer:</b><br>
 CREATE USER "ORDS_CUSTOM" IDENTIFIED BY "password";<br>
 GRANT "CONNECT" TO "ORDS_CUSTOM";<br>
 BEGIN<br>
@@ -38,7 +38,7 @@ BEGIN<br>
 END;<br>
 /<br>
 <br>
-4.2) Kubernetes "Secrets" erzeugen für den ORDS login und für den Download der Docker images von fra.ocir.io.<br>
+<b>4.2) Kubernetes "Secrets" erzeugen für den ORDS login und für den Download der Docker images von fra.ocir.io.</b><br>
 <br>
 Der eben neu angelegte DB Benutzer (z.B. ORDS_CUSTOM) erhielt auch ein Kennwort. Dieses bitte hier verwenden:<br>
 kubectl create secret generic ordspassword --type=string --from-literal=password=MYCLEARTEXTPASSWORD<br>
@@ -48,7 +48,7 @@ die bestehende docker Konfiguration zu verwenden ($HOME/.docker/config.json):<br
 <br>
 kubectl create secret generic oke-registry-secret --from-file=.dockerconfigjson=.\config.json --type=kubernetes.io/dockerconfigjson<br>
 <br>
-4.3) Anpassen der Datei ords_novolume.yaml<br>
+<b>4.3) Anpassen der Datei ords_novolume.yaml</b><br>
 In der Datei docker-images/ords_novolume.yaml ist anzupassen:<br>
 Der Name des Docker Images, d.h. Tenant Name und Name des Repositories:<br>
 
@@ -74,14 +74,14 @@ Der Eintrag ORACLE_PWD bzw. "dummy" ist beizubehalten ! Der Eintrag ORDS_PWD wir
                 name: ordspassword
                 key: password
 
-4.4) Einrichten der Anwendung<br>
+<b>4.4) Einrichten der Anwendung</b><br>
 Ausführen des Skriptes "ords_novolumes.yaml" mit<br>
 kubectl apply -f ords_novolumes.yaml<br>
 <br>
 Das Skript legt ein Deployment mit zwei ORDS-Containern ("Replica: 2" im yaml-File) an<br>
 sowie einen Netzwerk-Service mit einem LBaaS LoadBalancer davor ("type: LoadBalancer" im yaml-File).<br>
 <br>
-5) Prüfung ob alles geklappt hat<br>
+<b>5) Prüfung ob alles geklappt hat</b><br>
 Die Einrichtung erfolgte ohne Angabe von Namespaces. D.h. alle Secrets, Services und das Deployment landen aktuell im "default" namespace.<br>
 <br>
 kubectl get pods (Zwei Pods mit Namen ordscontainer* ?)<br>
