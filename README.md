@@ -18,14 +18,14 @@ Aufruf von docker-images/OracleRestDataServices/dockerfiles/buildDockerImage.sh<
 <br>
 <br>
 <b>3) Beide Docker images nach Frankfurt hochladen</b><br>
-docker tag oracle/serverjre:8 fra.ocir.io/<tenant-name>/<repo-name>/oracle/serverjre:8<br>
-docker tag oracle/restdataservices:20.4.3 fra.ocir.io/<tenant-name>/<repo-name>/oracle/restdataservices:20.4.3<br>
+docker tag oracle/serverjre:8 fra.ocir.io/{S3 ObjectStore Namespace}/{repo-name}/oracle/serverjre:8<br>
+docker tag oracle/restdataservices:20.4.3 fra.ocir.io/{S3 ObjectStore Namespace}/{repo-name}/oracle/restdataservices:20.4.3<br>
 docker login fra.ocir.io<br>
-Benutzername: <tenant-name>/<mail-adresse><br>
+Benutzername: {S3 ObjectStore Namespace}/{mail-adresse}<br>
 Passwort: AUTH TOKEN erzeugt in Cloud UI (z.B: Klick auf eigenen Benutzer -> Settings -> Auth Token)<br>
 <br>
-docker push fra.ocir.io/<tenant-name>/<repo-name>/oracle/serverjre:8<br>
-docker push fra.ocir.io/<tenant-name>/<repo-name>/oracle/restdataservices:20.4.3<br>
+docker push fra.ocir.io/{S3 ObjectStore Namespace}/{repo-name}/oracle/serverjre:8<br>
+docker push fra.ocir.io/{S3 ObjectStore Namespace}/{repo-name}/oracle/restdataservices:20.4.3<br>
 <br>
 <b>4) Kubernetes Anwendung einrichten</b><br>
 <b>4.1) Erzeugen eines Datenbank-Benutzers mit ORDS Berechtigung (parallel zu ORDS_PUBLIC_USER, z.B. ORDS_CUSTOM) via "admin" Benutzer:</b><br>
@@ -55,7 +55,7 @@ Der Name des Docker Images, d.h. Tenant Name und Name des Repositories:<br>
     spec:
       containers:
         - name: ordscontainer
-          image: ams.ocir.io/tenantname/reponame/oracle/restdataservices:20.4.3
+          image: ams.ocir.io/s3namespace/reponame/oracle/restdataservices:20.4.3
 
 DB Service und Benutzername des eben erzeugten Datenbank-Users ("ORDS_CUSTOM").<br>
 Der Eintrag ORACLE_PWD bzw. "dummy" ist beizubehalten ! Der Eintrag ORDS_PWD wird dynamisch aus dem eben erzeugten Secret ausgelesen.<br>
