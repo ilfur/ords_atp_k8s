@@ -18,6 +18,9 @@ Aufruf von docker-images/OracleRestDataServices/dockerfiles/buildDockerImage.sh<
 <br>
 <br>
 <b>3) Beide Docker images nach Frankfurt hochladen</b><br>
+
+Der dafür nötige "S3 ObjectStore Namespace" ist ersichtlich in der Oracle Cloud einerseits auf der Seite der Container Registry "namespace name", andererseits in der Cloud durch Klick auf den eigenen Benutzer -> Tenant Information. Dieser Namespace ist entgegen der Dokumentation NICHT identisch mit dem Tenant Namen !
+
 docker tag oracle/serverjre:8 fra.ocir.io/{S3 ObjectStore Namespace}/{repo-name}/oracle/serverjre:8<br>
 docker tag oracle/restdataservices:20.4.3 fra.ocir.io/{S3 ObjectStore Namespace}/{repo-name}/oracle/restdataservices:20.4.3<br>
 docker login fra.ocir.io<br>
