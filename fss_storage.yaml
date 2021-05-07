@@ -1,0 +1,41 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+  name: oci-fss
+provisioner: oracle.com/oci-fss
+parameters:
+  # Insert mount target from the FSS here
+  mntTargetId: ocid1.mounttarget.oc1.eu_amsterdam_1.aaaaaa4np2sugh75mfwxgllqojxwiotfouwwc3ltorsxezdbnuwtcllbmqwtcaaa
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+ name: oke-fsspv
+spec:
+ storageClassName: oci-fss
+ capacity:
+  storage: 100Gi
+ accessModes:
+  - ReadWriteMany
+ mountOptions:
+  - nosuid
+ nfs:
+# Replace this with the IP of your FSS file system in OCI
+  server: 10.0.10.235
+# Replace this with the Path of your FSS file system in OCI
+  path: "/FileSystemForOKE"
+  readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: oke-fsspvc
+spec:
+ storageClassName: oci-fss
+ accessModes:
+ - ReadWriteMany
+ resources:
+  requests:
+ # Although storage is provided here it is not used for FSS file systems
+    storage: 100Gi
+ volumeName: oke-fsspv
