@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ordscontainer
+  labels:
+    app: ordscontainer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ordscontainer
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ordscontainer
+    spec:
+      securityContext:
+        fsGroup: 54322  
+      volumes:
+       - name: ords-persistent-storage
+         persistentVolumeClaim:
+           claimName: oke-fsspvc
+           readOnly: false
+      containers:
+        - name: ordscontainer
+          image: ams.ocir.io/oraseemeadesandbox/publicrepo/oracle/restdataservices:20.4.3
+          env:
+            - name: ORACLE_USER
+              value: "ORDS_CUSTOM"
+            - name: ORACLE_SERVICE
+              value: "repodb_medium"
+            - name: ORACLE_PWD
+              value: "dummy"
+            - name: CONTEXT_ROOT
+              value: "ords"
+            - name: ORDS_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: ordspassword
+                  key: password
+          ports:
+            - name: ordsport
+              containerPort: 8888
+          volumeMounts:
+            - mountPath: /opt/oracle/ords/config/ords
+              name: ords-persistent-storage
+      imagePullSecrets:
+       - name: oke-registry-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: ordscontainer
+spec:
+ type: LoadBalancer
+ selector:
+   app: ordscontainer
+ ports:
+   - name: client
+     protocol: TCP
+     port: 8888
